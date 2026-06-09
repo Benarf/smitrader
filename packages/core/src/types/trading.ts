@@ -24,11 +24,25 @@ export interface Tick {
   symbol: string;
 }
 
+export interface Candle {
+  close: string;
+  epoch: number;
+  high: string;
+  low: string;
+  open: string;
+  open_time?: number;
+}
+
+export interface CandlesResponse {
+  candles: Candle[];
+}
+
 export interface TicksHistoryResponse {
   history: {
     prices: number[];
     times: number[];
   };
+  candles?: Candle[];
 }
 
 export interface ContractsForResponse {
@@ -88,6 +102,8 @@ export interface ProposalInfo {
 }
 
 export interface BuyResponse {
+  echo_req: Record<string, unknown>;
+  msg_type: string;
   buy: {
     balance_after: number;
     buy_price: number;

@@ -50,6 +50,8 @@ export type {
   StoredCodeVerifier,
   ActiveSymbol,
   Tick,
+  Candle,
+  CandlesResponse,
   TicksHistoryResponse,
   ContractsForResponse,
   ContractInfo,
