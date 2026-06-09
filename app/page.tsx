@@ -2,7 +2,9 @@
 
 import { useSmartChartsApi } from '@/hooks/use-smartcharts-api';
 import { useSmartChartChartData } from '@/hooks/use-smartchart-chart-data';
+import { useState } from 'react';
 import { useRiseFallTrading } from '../hooks/use-rise-fall-trading';
+import { useSmiStrategy } from '../hooks/use-smi-strategy';
 import { useDerivWSContext } from '@/components/custom/deriv-ws-provider';
 import { useLogoSrc } from '@/components/custom/logo-src-provider';
 import { RiseFallView } from '../components/rise-fall-view';
@@ -13,6 +15,23 @@ export default function RiseFallPage() {
   const { authState, accounts, activeAccount, login, signUp, logout, switchAccount } = auth;
 
   const trading = useRiseFallTrading({ ws, isConnected, isExhausted, isAuthenticated: !!auth.wsUrl, onAuthWSFailed: logout });
+
+  const [isAutoTradeEnabled, setIsAutoTradeEnabled] = useState(false);
+
+  const strategy = useSmiStrategy({
+    ws: trading.ws,
+    symbol: trading.activeSymbol?.underlying_symbol ?? '',
+    mode: trading.durationUnit === 't' ? 'Ticks' : 'Candles',
+    granularity:
+      trading.durationUnit === 'm' ? 60 :
+      trading.durationUnit === 'h' ? 3600 :
+      trading.durationUnit === 'd' ? 86400 : 60,
+    stake: trading.stake,
+    duration: trading.duration,
+    durationUnit: trading.durationUnit,
+    enabled: isAutoTradeEnabled,
+    allowEquals: trading.allowEquals,
+  });
 
   const { chartData } = useSmartChartChartData(trading.ws, trading.isConnected, trading.symbols);
   const { getQuotes, subscribeQuotes, unsubscribeQuotes } = useSmartChartsApi(trading.ws);
@@ -57,6 +76,9 @@ export default function RiseFallPage() {
       openPositions={trading.openPositions}
       sellContract={trading.sellContract}
       sellingId={trading.sellingId}
+      isAutoTradeEnabled={isAutoTradeEnabled}
+      setIsAutoTradeEnabled={setIsAutoTradeEnabled}
+      smiLastResult={strategy.lastResult}
       chartData={chartData}
       getQuotes={getQuotes}
       subscribeQuotes={subscribeQuotes}

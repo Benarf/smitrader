@@ -8,6 +8,7 @@ import { ThemeToggle } from '@/components/custom/theme-toggle';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useContractMarkers } from '@/hooks/use-contract-markers';
+import type { SMIResult } from '@/lib/smi-utils';
 import { TradeControls } from './trade-controls';
 import type {
   AuthState,
@@ -77,6 +78,11 @@ export interface RiseFallViewProps {
   sellContract: (contractId: number, bidPrice: string) => Promise<void>;
   sellingId: number | null;
 
+  // Autotrade
+  isAutoTradeEnabled: boolean;
+  setIsAutoTradeEnabled: (enabled: boolean) => void;
+  smiLastResult: SMIResult | null;
+
   // Chart data (elevated to page so preview can inject frozen mocks)
   chartData: SmartChartChartData | undefined;
   getQuotes: UseSmartChartsApiReturn['getQuotes'];
@@ -131,6 +137,9 @@ export function RiseFallView({
   buyError,
   clearBuyResult,
   openPositions,
+  isAutoTradeEnabled,
+  setIsAutoTradeEnabled,
+  smiLastResult,
   chartData,
   getQuotes,
   subscribeQuotes,
@@ -241,7 +250,23 @@ export function RiseFallView({
                     buyError={buyError}
                     onClearBuyResult={clearBuyResult}
                     isAuthenticated={authState === 'authenticated'}
+                    isAutoTradeEnabled={isAutoTradeEnabled}
+                    onAutoTradeToggle={setIsAutoTradeEnabled}
                   />
+                  {smiLastResult && (
+                    <div className="mt-4 p-2 rounded bg-muted/50 text-[10px] space-y-1">
+                      <div className="flex justify-between">
+                        <span>SMI:</span>
+                        <span className={smiLastResult.smi > 0 ? "text-green-500" : "text-destructive"}>
+                          {smiLastResult.smi.toFixed(4)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Signal:</span>
+                        <span>{smiLastResult.signal.toFixed(4)}</span>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}

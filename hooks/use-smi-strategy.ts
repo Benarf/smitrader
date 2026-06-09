@@ -14,6 +14,8 @@ export interface UseSmiStrategyParams {
   stake: string;
   duration: number;
   durationUnit: string;
+  enabled?: boolean;
+  allowEquals?: boolean;
 }
 
 export interface UseSmiStrategyReturn {
@@ -32,6 +34,8 @@ export function useSmiStrategy({
   stake,
   duration,
   durationUnit,
+  enabled,
+  allowEquals = false,
 }: UseSmiStrategyParams): UseSmiStrategyReturn {
   const [smiData, setSmiData] = useState<SMIResult[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -43,10 +47,10 @@ export function useSmiStrategy({
   const lastCompletedSmiRef = useRef<SMIResult | null>(null);
   const isExecutingRef = useRef(false);
 
-  const tradeParamsRef = useRef({ stake, duration, durationUnit });
+  const tradeParamsRef = useRef({ stake, duration, durationUnit, allowEquals });
   useEffect(() => {
-    tradeParamsRef.current = { stake, duration, durationUnit };
-  }, [stake, duration, durationUnit]);
+    tradeParamsRef.current = { stake, duration, durationUnit, allowEquals };
+  }, [stake, duration, durationUnit, allowEquals]);
 
   const executeTrade = useCallback(
     async (type: 'CALL' | 'PUT', tradeStake: string, tradeDuration: number, tradeUnit: string) => {
@@ -54,13 +58,16 @@ export function useSmiStrategy({
 
       try {
         isExecutingRef.current = true;
+        const { allowEquals: currentAllowEquals } = tradeParamsRef.current;
+        const contractType = currentAllowEquals ? `${type}E` : type;
+
         const request = {
           buy: '1',
           price: parseFloat(tradeStake),
           parameters: {
             amount: parseFloat(tradeStake),
             basis: 'stake',
-            contract_type: type,
+            contract_type: contractType,
             currency: 'USD',
             duration: tradeDuration,
             duration_unit: tradeUnit,
@@ -78,8 +85,14 @@ export function useSmiStrategy({
     [ws, symbol]
   );
 
+  const enabledRef = useRef(enabled);
+  useEffect(() => {
+    enabledRef.current = enabled;
+  }, [enabled]);
+
   const checkCandleStrategy = useCallback(
     (current: SMIResult, previous: SMIResult) => {
+      if (!enabledRef.current) return;
       const overbought = 40;
       const oversold = -40;
 
@@ -110,6 +123,7 @@ export function useSmiStrategy({
 
   const checkTickStrategy = useCallback(
     (current: SMIResult, previous: SMIResult) => {
+      if (!enabledRef.current) return;
       const boundary = 70;
       const { stake: currentStake, duration: currentDuration, durationUnit: currentUnit } = tradeParamsRef.current;
 
