@@ -41,6 +41,8 @@ interface TradeControlsProps {
   onClearBuyResult: () => void;
   /** Whether the user is authenticated — shows the View your positions link when true. */
   isAuthenticated?: boolean;
+  isAutoTradeEnabled: boolean;
+  onAutoTradeToggle: (enabled: boolean) => void;
 }
 
 export function TradeControls({
@@ -69,6 +71,8 @@ export function TradeControls({
   buyError,
   onClearBuyResult,
   isAuthenticated,
+  isAutoTradeEnabled,
+  onAutoTradeToggle,
 }: TradeControlsProps) {
   useEffect(() => {
     if (buyError) {
@@ -125,14 +129,24 @@ export function TradeControls({
         </ToggleGroupItem>
       </ToggleGroup>
 
-      {/* Allow equals */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="allow-equals" className="text-sm cursor-pointer">Allow equals</Label>
-        <Switch
-          id="allow-equals"
-          checked={allowEquals}
-          onCheckedChange={onAllowEqualsChange}
-        />
+      {/* Autotrade and Allow equals */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="auto-trade" className="text-sm font-semibold cursor-pointer text-primary">AutoTrade SMI</Label>
+          <Switch
+            id="auto-trade"
+            checked={isAutoTradeEnabled}
+            onCheckedChange={onAutoTradeToggle}
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="allow-equals" className="text-sm cursor-pointer">Allow equals</Label>
+          <Switch
+            id="allow-equals"
+            checked={allowEquals}
+            onCheckedChange={onAllowEqualsChange}
+          />
+        </div>
       </div>
 
       {/* Stake */}
