@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { DerivWS } from '@deriv/core';
+import type { DerivWS, CandlesResponse, TicksHistoryResponse } from '@deriv/core';
 import { calculateSMI, DEFAULT_SMI_PARAMS, type OHLC, type SMIResult } from '@/lib/smi-utils';
 
 export type StrategyMode = 'Candles' | 'Ticks';
@@ -227,9 +227,9 @@ export function useSmiStrategy({
             count: 100,
             end: 'latest',
           };
-          const response = await ws.send(historyReq);
+          const response = await ws.send<CandlesResponse>(historyReq);
           if (response.candles) {
-            candleState.current = response.candles.map((c: any) => ({
+            candleState.current = response.candles.map((c) => ({
               epoch: c.epoch,
               open: parseFloat(c.open),
               high: parseFloat(c.high),
@@ -261,7 +261,7 @@ export function useSmiStrategy({
             count: 50,
             end: 'latest',
           };
-          const response = await ws.send(historyReq);
+          const response = await ws.send<TicksHistoryResponse>(historyReq);
           if (response.history && response.history.prices) {
             tickBuffer.current = response.history.prices;
 

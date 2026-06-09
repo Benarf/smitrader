@@ -13,6 +13,8 @@ export type {
 export type {
   ActiveSymbol,
   Tick,
+  Candle,
+  CandlesResponse,
   TicksHistoryResponse,
   ContractsForResponse,
   ContractInfo,
