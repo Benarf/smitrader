@@ -4,7 +4,7 @@ import { useSmartChartsApi } from '@/hooks/use-smartcharts-api';
 import { useSmartChartChartData } from '@/hooks/use-smartchart-chart-data';
 import { useState } from 'react';
 import { useRiseFallTrading } from '../hooks/use-rise-fall-trading';
-import { useSmiStrategy } from '../hooks/use-smi-strategy';
+import { useGeminiStrategy } from '../hooks/use-gemini-strategy';
 import { useDerivWSContext } from '@/components/custom/deriv-ws-provider';
 import { useLogoSrc } from '@/components/custom/logo-src-provider';
 import { RiseFallView } from '../components/rise-fall-view';
@@ -18,7 +18,7 @@ export default function RiseFallPage() {
 
   const [isAutoTradeEnabled, setIsAutoTradeEnabled] = useState(false);
 
-  const strategy = useSmiStrategy({
+  const strategy = useGeminiStrategy({
     ws: trading.ws,
     symbol: trading.activeSymbol?.underlying_symbol ?? '',
     mode: trading.durationUnit === 't' ? 'Ticks' : 'Candles',
@@ -30,7 +30,6 @@ export default function RiseFallPage() {
     duration: trading.duration,
     durationUnit: trading.durationUnit,
     enabled: isAutoTradeEnabled,
-    allowEquals: trading.allowEquals,
   });
 
   const { chartData } = useSmartChartChartData(trading.ws, trading.isConnected, trading.symbols);
@@ -78,7 +77,8 @@ export default function RiseFallPage() {
       sellingId={trading.sellingId}
       isAutoTradeEnabled={isAutoTradeEnabled}
       setIsAutoTradeEnabled={setIsAutoTradeEnabled}
-      smiLastResult={strategy.lastResult}
+      geminiLastSignal={strategy.lastSignal}
+      strategyMarketData={strategy.marketData}
       chartData={chartData}
       getQuotes={getQuotes}
       subscribeQuotes={subscribeQuotes}
