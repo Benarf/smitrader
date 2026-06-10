@@ -132,7 +132,7 @@ export function TradeControls({
       {/* Autotrade and Allow equals */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="auto-trade" className="text-sm font-semibold cursor-pointer text-primary">AutoTrade SMI</Label>
+          <Label htmlFor="auto-trade" className="text-sm font-semibold cursor-pointer text-primary">AutoTrade AI</Label>
           <Switch
             id="auto-trade"
             checked={isAutoTradeEnabled}

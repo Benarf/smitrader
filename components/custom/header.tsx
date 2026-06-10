@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -54,6 +56,7 @@ export function Header({
   appName,
   actions,
 }: HeaderProps) {
+  const pathname = usePathname();
   const [logoError, setLogoError] = useState(false);
   const logoLetter = (appName ?? process.env.NEXT_PUBLIC_DERIV_APP_NAME ?? 'Deriv Trading')
     .trim()
@@ -82,6 +85,35 @@ export function Header({
         <h1 className="text-lg font-semibold text-foreground hidden sm:block">
           {process.env.NEXT_PUBLIC_DERIV_APP_NAME ?? 'Deriv Trading'}
         </h1>
+        <nav className="hidden lg:flex items-center gap-6 ml-6">
+          <Link
+            href="/"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/" ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            Trade
+          </Link>
+          <Link
+            href="/dashboard"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/dashboard" ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/reports"
+            className={cn(
+              "text-sm font-medium transition-colors hover:text-primary",
+              pathname === "/reports" ? "text-foreground" : "text-muted-foreground"
+            )}
+          >
+            Reports
+          </Link>
+        </nav>
       </div>
       <div className="flex items-center gap-3">
         {actions}

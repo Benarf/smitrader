@@ -8,8 +8,9 @@ import { ThemeToggle } from '@/components/custom/theme-toggle';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-is-mobile';
 import { useContractMarkers } from '@/hooks/use-contract-markers';
-import type { SMIResult } from '@/lib/smi-utils';
 import { TradeControls } from './trade-controls';
+import { BacktestingTool } from './custom/backtesting-tool';
+import type { GeminiSignal } from '@/hooks/use-gemini-strategy';
 import type {
   AuthState,
   DerivAccount,
@@ -81,7 +82,8 @@ export interface RiseFallViewProps {
   // Autotrade
   isAutoTradeEnabled: boolean;
   setIsAutoTradeEnabled: (enabled: boolean) => void;
-  smiLastResult: SMIResult | null;
+  geminiLastSignal: GeminiSignal | null;
+  strategyMarketData?: any[];
 
   // Chart data (elevated to page so preview can inject frozen mocks)
   chartData: SmartChartChartData | undefined;
@@ -139,7 +141,8 @@ export function RiseFallView({
   openPositions,
   isAutoTradeEnabled,
   setIsAutoTradeEnabled,
-  smiLastResult,
+  geminiLastSignal,
+  strategyMarketData,
   chartData,
   getQuotes,
   subscribeQuotes,
@@ -253,20 +256,43 @@ export function RiseFallView({
                     isAutoTradeEnabled={isAutoTradeEnabled}
                     onAutoTradeToggle={setIsAutoTradeEnabled}
                   />
-                  {smiLastResult && (
-                    <div className="mt-4 p-2 rounded bg-muted/50 text-[10px] space-y-1">
-                      <div className="flex justify-between">
-                        <span>SMI:</span>
-                        <span className={smiLastResult.smi > 0 ? "text-green-500" : "text-destructive"}>
-                          {smiLastResult.smi.toFixed(4)}
+                  {geminiLastSignal && (
+                    <div className="mt-4 p-3 rounded-lg bg-muted/50 text-[10px] space-y-2 border border-border">
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold uppercase tracking-wider opacity-70">AI Signal:</span>
+                        <span className={`font-bold px-1.5 py-0.5 rounded ${
+                          geminiLastSignal.signal === 'CALL' ? "bg-green-500/20 text-green-500" :
+                          geminiLastSignal.signal === 'PUT' ? "bg-destructive/20 text-destructive" :
+                          "bg-muted text-muted-foreground"
+                        }`}>
+                          {geminiLastSignal.signal}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Signal:</span>
-                        <span>{smiLastResult.signal.toFixed(4)}</span>
+                        <span className="opacity-70">Confidence:</span>
+                        <span className="font-mono">{(geminiLastSignal.confidence * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="opacity-70">Risk Level:</span>
+                        <span className={`font-mono ${
+                          geminiLastSignal.risk_level === 'LOW' ? "text-green-500" :
+                          geminiLastSignal.risk_level === 'MEDIUM' ? "text-yellow-500" :
+                          "text-destructive"
+                        }`}>{geminiLastSignal.risk_level}</span>
+                      </div>
+                      <div className="pt-1 border-t border-border/50">
+                        <p className="italic opacity-80 leading-relaxed line-clamp-2" title={geminiLastSignal.reasoning}>
+                          {geminiLastSignal.reasoning}
+                        </p>
                       </div>
                     </div>
                   )}
+                  <BacktestingTool
+                    historicalData={strategyMarketData || []}
+                    symbol={activeSymbol?.underlying_symbol || ''}
+                    stake={stake}
+                    duration={duration}
+                  />
                 </CardContent>
               </Card>
             )}
